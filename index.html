@@ -22,6 +22,7 @@
       background-color: var(--bg);
       color: #ffffff;
       min-height: 100vh;
+      min-height: 100dvh;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
@@ -30,12 +31,12 @@
       position: relative;
       width: 100vw;
       height: 100vh;
+      height: 100dvh; /* Adapts dynamically to mobile browser address bars */
       background: #000000;
       overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      cursor: pointer;
     }
 
     .hero-video-container video {
@@ -57,30 +58,31 @@
       padding: 0.4rem 0.85rem;
       border-radius: 9999px;
       border: 1px solid rgba(255, 255, 255, 0.2);
-      z-index: 10;
+      z-index: 20;
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
 
     .unmute-btn {
       position: absolute;
-      bottom: 1.5rem;
-      right: 1.5rem;
-      background: rgba(0, 0, 0, 0.75);
+      bottom: 2.5rem; /* Raised slightly higher off the screen bottom for mobile swipe bars */
+      right: 1.25rem;
+      background: rgba(0, 0, 0, 0.85);
       color: #fff;
-      border: 1px solid rgba(255, 255, 255, 0.3);
-      padding: 0.5rem 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      padding: 0.6rem 1.1rem;
       border-radius: 9999px;
-      font-size: 0.8rem;
+      font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
-      z-index: 10;
+      z-index: 30; /* High z-index to stay above video overlays on touch devices */
       transition: all 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    .unmute-btn:hover {
-      background: rgba(37, 99, 235, 0.8);
-      border-color: var(--primary);
+    .unmute-btn:active {
+      transform: scale(0.95);
+      background: rgba(37, 99, 235, 0.9);
     }
 
     /* Poster Gallery Section - Displays from Thursday onwards */
@@ -96,6 +98,7 @@
       position: relative;
       width: 100vw;
       height: 100vh;
+      height: 100dvh;
       overflow: hidden;
       background: var(--card-bg);
       flex-shrink: 0;
@@ -184,7 +187,7 @@
         Your browser does not support video playback.
       </video>
 
-      <button id="sound-btn" class="unmute-btn">🔇 Tap for Sound</button>
+      <button id="sound-btn" class="unmute-btn" onclick="toggleSound(event)">🔇 Tap for Sound</button>
     </section>
 
     <!-- Poster Gallery Section (Visible from Thursday onward) -->
@@ -255,38 +258,23 @@
     }
 
     function toggleSound(e) {
-      if (e) e.stopPropagation();
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       const videoPlayer = document.getElementById('daily-video');
       const soundBtn = document.getElementById('sound-btn');
       
+      if (!videoPlayer) return;
+
       if (videoPlayer.muted) {
         videoPlayer.muted = false;
         soundBtn.textContent = "🔊 Mute Sound";
-        videoPlayer.play().catch(() => {});
+        videoPlayer.play().catch(err => console.log("Audio play prevented:", err));
       } else {
         videoPlayer.muted = true;
         soundBtn.textContent = "🔇 Tap for Sound";
       }
-    }
-
-    function setupFirstTouchUnmute() {
-      const heroContainer = document.getElementById('video-hero');
-      const soundBtn = document.getElementById('sound-btn');
-
-      const handleUnmuteGesture = () => {
-        const videoPlayer = document.getElementById('daily-video');
-        if (videoPlayer && videoPlayer.muted) {
-          videoPlayer.muted = false;
-          soundBtn.textContent = "🔊 Mute Sound";
-          videoPlayer.play().catch(() => {});
-        }
-        heroContainer.removeEventListener('touchstart', handleUnmuteGesture);
-        heroContainer.removeEventListener('click', handleUnmuteGesture);
-      };
-
-      heroContainer.addEventListener('touchstart', handleUnmuteGesture, { passive: true });
-      heroContainer.addEventListener('click', handleUnmuteGesture, { passive: true });
-      soundBtn.addEventListener('click', toggleSound);
     }
 
     function renderGallery() {
@@ -346,7 +334,6 @@
         galleryContainer.style.display = 'none';
         document.body.style.overflow = 'hidden';
         updateDailyVideo();
-        setupFirstTouchUnmute();
       } else {
         heroContainer.style.display = 'none';
         galleryContainer.style.display = 'flex';
