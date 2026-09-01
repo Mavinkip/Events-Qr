@@ -29,7 +29,8 @@
     .hero-video-container {
       position: relative;
       width: 100vw;
-      height: 100vh;
+      height: auto;
+      max-height: 100vh;
       background: #000000;
       overflow: hidden;
       flex-shrink: 0;
@@ -40,8 +41,9 @@
 
     .hero-video-container video {
       width: 100%;
-      height: 100%;
-      object-fit: contain; /* Prevents text and side content from getting cut off */
+      height: auto;
+      max-height: 100vh;
+      object-fit: contain;
       display: block;
     }
 
@@ -185,9 +187,9 @@
   <main>
     <!-- Daily Video Hero Player -->
     <section id="video-hero" class="hero-video-container">
-      <span id="video-tag" class="video-overlay-badge">DAILY HIGHLIGHT</span>
       
-      <video id="daily-video" autoplay loop muted playsinline webkit-playsinline preload="auto">
+      <!-- Removed loop attribute so video 'ended' event triggers -->
+      <video id="daily-video" autoplay muted playsinline webkit-playsinline preload="auto">
         <source id="video-source" src="videos/web_video1.mp4" type="video/mp4; codecs=avc1.42E01E, mp4a.40.2">
         Your browser does not support video playback.
       </video>
@@ -256,7 +258,6 @@
         videoPlayer.load();
       }
 
-      // Always start muted so browsers allow instant autoplay
       videoPlayer.muted = true;
       videoPlayer.play().catch(() => {});
     }
@@ -309,7 +310,7 @@
         const isClosest = evt.id === closestId;
 
         return `
-          <div class="card ${isClosest ? 'is-closest' : ''}">
+          <div id="${isClosest ? 'closest-event-card' : ''}" class="card ${isClosest ? 'is-closest' : ''}">
             ${isClosest ? `<span class="badge-closest">⭐ CLOSEST</span>` : ''}
             <img 
               src="images/${evt.image}" 
@@ -319,6 +320,17 @@
           </div>
         `;
       }).join('');
+    }
+
+    function setupVideoCompletionScroll() {
+      const videoElement = document.getElementById('daily-video');
+
+      videoElement.addEventListener('ended', () => {
+        const closestCard = document.getElementById('closest-event-card');
+        if (closestCard) {
+          closestCard.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
     }
 
     function setupScrollVideoControl() {
@@ -359,6 +371,7 @@
     function initPage() {
       updateDailyVideo();
       renderGallery();
+      setupVideoCompletionScroll();
       setupScrollVideoControl();
       enableAudioOnUserGesture();
     }
