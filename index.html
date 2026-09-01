@@ -25,15 +25,13 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    /* Hero Video Section */
+    /* Video Player - Displays before Thursday */
     .hero-video-container {
       position: relative;
       width: 100vw;
-      height: auto;
-      max-height: 100vh;
+      height: 100vh;
       background: #000000;
       overflow: hidden;
-      flex-shrink: 0;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -42,8 +40,7 @@
 
     .hero-video-container video {
       width: 100%;
-      height: auto;
-      max-height: 100vh;
+      height: 100%;
       object-fit: contain;
       display: block;
     }
@@ -86,7 +83,7 @@
       border-color: var(--primary);
     }
 
-    /* Poster Gallery Section */
+    /* Poster Gallery Section - Displays from Thursday onward */
     .gallery-grid {
       display: flex;
       flex-direction: column;
@@ -135,14 +132,6 @@
         padding: 1.5rem;
       }
 
-      .hero-video-container {
-        max-width: 1200px;
-        height: auto;
-        aspect-ratio: 2 / 3;
-        margin: 0 auto 1.5rem auto;
-        border-radius: var(--radius);
-      }
-
       .gallery-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -186,35 +175,34 @@
 <body>
 
   <main>
-    <!-- Daily Video Hero Player -->
-    <section id="video-hero" class="hero-video-container">
+    <!-- Video Player Section (Visible before Thursday) -->
+    <section id="video-hero" class="hero-video-container" style="display: none;">
       
-      <video id="daily-video" autoplay muted playsinline webkit-playsinline preload="auto">
+      <video id="daily-video" autoplay loop muted playsinline webkit-playsinline preload="auto">
         <source id="video-source" src="videos/web_video1.mp4" type="video/mp4; codecs=avc1.42E01E, mp4a.40.2">
         Your browser does not support video playback.
       </video>
 
-      <button id="sound-btn" class="unmute-btn">🔇 Tap for Sound</button>
+      <button id="sound-btn" class="unmute-btn">🔇 </button>
     </section>
 
-    <!-- Poster Gallery -->
-    <div id="gallery" class="gallery-grid"></div>
+    <!-- Poster Gallery Section (Visible from Thursday onward) -->
+    <div id="gallery" class="gallery-grid" style="display: none;"></div>
   </main>
 
   <script>
-    // 1. Daily Video Schedule
+    // Release Date Threshold: Thursday, September 3, 2026
+    const THURSDAY_DATE_STR = "2026-09-03";
+
+    // Pre-Thursday Video Schedule
     const videoSchedule = [
       { date: "2026-09-01", video: "web_video1.mp4", label: "Countdown Kickoff" },
-      { date: "2026-09-02", video: "web_video1.mp4", label: "Build Up Teaser" },
-      { date: "2026-09-03", video: "web_video1.mp4", label: "Opening Night Teaser" },
-      { date: "2026-09-04", video: "web_video1.mp4", label: "Friday Night Vibe" },
-      { date: "2026-09-05", video: "web_video2.mp4", label: "Saturday Night Teaser" },
-      { date: "2026-09-06", video: "web_video3.mp4", label: "Grand Finale Teaser" }
+      { date: "2026-09-02", video: "web_video1.mp4", label: "Build Up Teaser" }
     ];
 
-    const defaultVideo = { video: "web_video1.mp4", label: "Anniversary Preview" };
+    const defaultVideo = { video: "web_video1.mp4", label: "Anniversary Teaser" };
 
-    // 2. Poster Events Schedule
+    // Thursday Onward Posters Schedule
     const events = [
       { id: 1, title: "Sunday Anniversary Night", startDate: "2026-09-06", endDate: "2026-09-06", image: "poster1.jpeg" },
       { id: 2, title: "Anniversary Saturday", startDate: "2026-09-05", endDate: "2026-09-05", image: "poster3.jpeg" },
@@ -273,7 +261,7 @@
         videoPlayer.play().catch(() => {});
       } else {
         videoPlayer.muted = true;
-        soundBtn.textContent = "🔇 Tap for Sound";
+        soundBtn.textContent = "🔇 ";
       }
     }
 
@@ -281,7 +269,7 @@
       const heroContainer = document.getElementById('video-hero');
       const soundBtn = document.getElementById('sound-btn');
 
-      const handleUnmuteGesture = (e) => {
+      const handleUnmuteGesture = () => {
         const videoPlayer = document.getElementById('daily-video');
         if (videoPlayer && videoPlayer.muted) {
           videoPlayer.muted = false;
@@ -332,7 +320,7 @@
         const isClosest = evt.id === closestId;
 
         return `
-          <div id="${isClosest ? 'closest-event-card' : ''}" class="card ${isClosest ? 'is-closest' : ''}">
+          <div class="card ${isClosest ? 'is-closest' : ''}">
             ${isClosest ? `<span class="badge-closest">⭐ CLOSEST</span>` : ''}
             <img 
               src="images/${evt.image}" 
@@ -344,46 +332,41 @@
       }).join('');
     }
 
-    function setupVideoCompletionScroll() {
-      const videoElement = document.getElementById('daily-video');
+    function handleDisplayMode() {
+      const todayStr = getFormattedTodayStr();
+      const heroContainer = document.getElementById('video-hero');
+      const galleryContainer = document.getElementById('gallery');
 
-      videoElement.addEventListener('ended', () => {
-        const closestCard = document.getElementById('closest-event-card');
-        if (closestCard) {
-          closestCard.scrollIntoView({ behavior: 'smooth' });
-        }
-      });
-    }
-
-    function setupScrollVideoControl() {
-      const videoElement = document.getElementById('daily-video');
-      const heroSection = document.getElementById('video-hero');
-
-      const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-          if (entry.isIntersecting) {
-            videoElement.play().catch(() => {});
-          } else {
-            videoElement.pause();
-          }
-        });
-      }, { threshold: 0.25 });
-
-      observer.observe(heroSection);
+      // Before Thursday -> Show Videos, Hide Posters
+      if (todayStr < THURSDAY_DATE_STR) {
+        heroContainer.style.display = 'flex';
+        galleryContainer.style.display = 'none';
+        document.body.style.overflow = 'hidden';
+        updateDailyVideo();
+        setupFirstTouchUnmute();
+      } 
+      // Thursday Onward -> Hide Videos, Show Posters
+      else {
+        heroContainer.style.display = 'none';
+        galleryContainer.style.display = 'flex';
+        document.body.style.overflow = 'auto';
+        
+        // Pause video playback if running
+        const videoPlayer = document.getElementById('daily-video');
+        if (videoPlayer) videoPlayer.pause();
+        
+        renderGallery();
+      }
     }
 
     function initPage() {
-      updateDailyVideo();
-      renderGallery();
-      setupFirstTouchUnmute();
-      setupVideoCompletionScroll();
-      setupScrollVideoControl();
+      handleDisplayMode();
     }
 
     initPage();
-    setInterval(updateDailyVideo, 30000);
+    setInterval(handleDisplayMode, 30000);
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') updateDailyVideo();
+      if (document.visibilityState === 'visible') handleDisplayMode();
     });
   </script>
 </body>
