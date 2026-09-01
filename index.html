@@ -25,20 +25,23 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    /* Hero Video Section - Full Screen Mobile / Card Desktop */
+    /* Hero Video Section */
     .hero-video-container {
       position: relative;
       width: 100vw;
       height: 100vh;
-      background: var(--card-bg);
+      background: #000000;
       overflow: hidden;
       flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     .hero-video-container video {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain; /* Prevents text and side content from getting cut off */
       display: block;
     }
 
@@ -251,7 +254,6 @@
         videoTag.textContent = `🔥 ${scheduledItem.label}`;
         videoPlayer.load();
         
-        // Try unmuted play first; if rejected by browser policy, fall back to muted play
         videoPlayer.muted = false;
         const playPromise = videoPlayer.play();
         
@@ -324,7 +326,6 @@
       }).join('');
     }
 
-    // Auto Pause/Play video on scroll
     function setupScrollVideoControl() {
       const videoElement = document.getElementById('daily-video');
       const heroSection = document.getElementById('video-hero');
@@ -342,7 +343,6 @@
       observer.observe(heroSection);
     }
 
-    // Unmute audio automatically on first touch, scroll, or click anywhere on screen
     function enableAudioOnUserGesture() {
       const videoPlayer = document.getElementById('daily-video');
       const soundBtn = document.getElementById('sound-btn');
@@ -352,13 +352,11 @@
           videoPlayer.muted = false;
           soundBtn.textContent = "🔊 Mute Sound";
         }
-        // Remove listeners after first interaction
         window.removeEventListener('touchstart', unlockAudio);
         window.removeEventListener('scroll', unlockAudio);
         window.removeEventListener('click', unlockAudio);
       };
 
-      // Listen for user interactions
       window.addEventListener('touchstart', unlockAudio, { passive: true });
       window.addEventListener('scroll', unlockAudio, { passive: true });
       window.addEventListener('click', unlockAudio, { passive: true });
@@ -378,4 +376,4 @@
     });
   </script>
 </body>
-</html>1
+</html>
