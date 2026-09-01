@@ -37,6 +37,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
     }
 
     .hero-video-container video {
@@ -187,14 +188,14 @@
   <main>
     <!-- Daily Video Hero Player -->
     <section id="video-hero" class="hero-video-container">
+      <span id="video-tag" class="video-overlay-badge">DAILY HIGHLIGHT</span>
       
-      <!-- Removed loop attribute so video 'ended' event triggers -->
       <video id="daily-video" autoplay muted playsinline webkit-playsinline preload="auto">
         <source id="video-source" src="videos/web_video1.mp4" type="video/mp4; codecs=avc1.42E01E, mp4a.40.2">
         Your browser does not support video playback.
       </video>
 
-      <button id="sound-btn" class="unmute-btn" onclick="toggleSound()">🔇 Tap for Sound</button>
+      <button id="sound-btn" class="unmute-btn">🔇 Tap for Sound</button>
     </section>
 
     <!-- Poster Gallery -->
@@ -262,17 +263,39 @@
       videoPlayer.play().catch(() => {});
     }
 
-    function toggleSound() {
+    function toggleSound(e) {
+      if (e) e.stopPropagation();
       const videoPlayer = document.getElementById('daily-video');
       const soundBtn = document.getElementById('sound-btn');
       
       if (videoPlayer.muted) {
         videoPlayer.muted = false;
         soundBtn.textContent = "🔊 Mute Sound";
+        videoPlayer.play().catch(() => {});
       } else {
         videoPlayer.muted = true;
         soundBtn.textContent = "🔇 Tap for Sound";
       }
+    }
+
+    function setupFirstTouchUnmute() {
+      const heroContainer = document.getElementById('video-hero');
+      const soundBtn = document.getElementById('sound-btn');
+
+      const handleUnmuteGesture = (e) => {
+        const videoPlayer = document.getElementById('daily-video');
+        if (videoPlayer && videoPlayer.muted) {
+          videoPlayer.muted = false;
+          soundBtn.textContent = "🔊 Mute Sound";
+          videoPlayer.play().catch(() => {});
+        }
+        heroContainer.removeEventListener('touchstart', handleUnmuteGesture);
+        heroContainer.removeEventListener('click', handleUnmuteGesture);
+      };
+
+      heroContainer.addEventListener('touchstart', handleUnmuteGesture, { passive: true });
+      heroContainer.addEventListener('click', handleUnmuteGesture, { passive: true });
+      soundBtn.addEventListener('click', toggleSound);
     }
 
     function renderGallery() {
@@ -350,30 +373,12 @@
       observer.observe(heroSection);
     }
 
-    function enableAudioOnUserGesture() {
-      const videoPlayer = document.getElementById('daily-video');
-      const soundBtn = document.getElementById('sound-btn');
-
-      const unlockAudio = () => {
-        videoPlayer.muted = false;
-        soundBtn.textContent = "🔊 Mute Sound";
-
-        window.removeEventListener('touchstart', unlockAudio);
-        window.removeEventListener('scroll', unlockAudio);
-        window.removeEventListener('click', unlockAudio);
-      };
-
-      window.addEventListener('touchstart', unlockAudio, { passive: true });
-      window.addEventListener('scroll', unlockAudio, { passive: true });
-      window.addEventListener('click', unlockAudio, { passive: true });
-    }
-
     function initPage() {
       updateDailyVideo();
       renderGallery();
+      setupFirstTouchUnmute();
       setupVideoCompletionScroll();
       setupScrollVideoControl();
-      enableAudioOnUserGesture();
     }
 
     initPage();
