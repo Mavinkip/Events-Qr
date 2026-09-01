@@ -185,6 +185,7 @@
   <main>
     <!-- Daily Video Hero Player -->
     <section id="video-hero" class="hero-video-container">
+      <span id="video-tag" class="video-overlay-badge">🔥 DAILY HIGHLIGHT</span>
       
       <video id="daily-video" autoplay loop muted playsinline webkit-playsinline preload="auto">
         <source id="video-source" src="videos/web_video1.mp4" type="video/mp4; codecs=avc1.42E01E, mp4a.40.2">
@@ -253,17 +254,11 @@
         videoSource.src = targetSrc;
         videoTag.textContent = `🔥 ${scheduledItem.label}`;
         videoPlayer.load();
-        
-        videoPlayer.muted = false;
-        const playPromise = videoPlayer.play();
-        
-        if (playPromise !== undefined) {
-          playPromise.catch(() => {
-            videoPlayer.muted = true;
-            videoPlayer.play().catch(() => {});
-          });
-        }
       }
+
+      // Always start muted so browsers allow instant autoplay
+      videoPlayer.muted = true;
+      videoPlayer.play().catch(() => {});
     }
 
     function toggleSound() {
@@ -348,10 +343,9 @@
       const soundBtn = document.getElementById('sound-btn');
 
       const unlockAudio = () => {
-        if (videoPlayer.muted) {
-          videoPlayer.muted = false;
-          soundBtn.textContent = "🔊 Mute Sound";
-        }
+        videoPlayer.muted = false;
+        soundBtn.textContent = "🔊 Mute Sound";
+
         window.removeEventListener('touchstart', unlockAudio);
         window.removeEventListener('scroll', unlockAudio);
         window.removeEventListener('click', unlockAudio);
