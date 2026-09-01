@@ -177,6 +177,7 @@
   <main>
     <!-- Video Player Section (Visible before Thursday) -->
     <section id="video-hero" class="hero-video-container" style="display: none;">
+      <span id="video-tag" class="video-overlay-badge">🔥 DAILY HIGHLIGHT</span>
       
       <video id="daily-video" autoplay loop muted playsinline webkit-playsinline preload="auto">
         <source id="video-source" src="videos/web_video1.mp4" type="video/mp4; codecs=avc1.42E01E, mp4a.40.2">
@@ -242,8 +243,11 @@
 
       if (!videoSource.src.includes(targetSrc)) {
         videoSource.src = targetSrc;
-        videoTag.textContent = `🔥 ${scheduledItem.label}`;
         videoPlayer.load();
+      }
+
+      if (videoTag) {
+        videoTag.textContent = `🔥 ${scheduledItem.label}`;
       }
 
       videoPlayer.muted = true;
@@ -337,21 +341,17 @@
       const heroContainer = document.getElementById('video-hero');
       const galleryContainer = document.getElementById('gallery');
 
-      // Before Thursday -> Show Videos, Hide Posters
       if (todayStr < THURSDAY_DATE_STR) {
         heroContainer.style.display = 'flex';
         galleryContainer.style.display = 'none';
         document.body.style.overflow = 'hidden';
         updateDailyVideo();
         setupFirstTouchUnmute();
-      } 
-      // Thursday Onward -> Hide Videos, Show Posters
-      else {
+      } else {
         heroContainer.style.display = 'none';
         galleryContainer.style.display = 'flex';
         document.body.style.overflow = 'auto';
         
-        // Pause video playback if running
         const videoPlayer = document.getElementById('daily-video');
         if (videoPlayer) videoPlayer.pause();
         
