@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Event Gallery</title>
+  <title>Baniyas Square 3rd Anniversary</title>
   <style>
     :root {
       --primary: #2563eb;
@@ -25,6 +25,62 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
+    /* Hero Video Section - Full Screen Mobile / Card Desktop */
+    .hero-video-container {
+      position: relative;
+      width: 100vw;
+      height: 100vh;
+      background: var(--card-bg);
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .hero-video-container video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .video-overlay-badge {
+      position: absolute;
+      top: 1.25rem;
+      left: 1.25rem;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.4rem 0.85rem;
+      border-radius: 9999px;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      z-index: 10;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .unmute-btn {
+      position: absolute;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background: rgba(0, 0, 0, 0.75);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      z-index: 10;
+      transition: all 0.3s ease;
+    }
+
+    .unmute-btn:hover {
+      background: rgba(37, 99, 235, 0.8);
+      border-color: var(--primary);
+    }
+
+    /* Poster Gallery Section */
     .gallery-grid {
       display: flex;
       flex-direction: column;
@@ -73,6 +129,14 @@
         padding: 1.5rem;
       }
 
+      .hero-video-container {
+        max-width: 1200px;
+        height: auto;
+        aspect-ratio: 2 / 3;
+        margin: 0 auto 1.5rem auto;
+        border-radius: var(--radius);
+      }
+
       .gallery-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -116,18 +180,51 @@
 <body>
 
   <main>
+    <!-- Daily Video Hero Player -->
+    <section id="video-hero" class="hero-video-container">
+      
+      <video id="daily-video" autoplay loop muted playsinline webkit-playsinline preload="auto">
+        <source id="video-source" src="videos/web_video1.mp4" type="video/mp4; codecs=avc1.42E01E, mp4a.40.2">
+        Your browser does not support video playback.
+      </video>
+
+      <button id="sound-btn" class="unmute-btn" onclick="toggleSound()">🔇 Tap for Sound</button>
+    </section>
+
+    <!-- Poster Gallery -->
     <div id="gallery" class="gallery-grid"></div>
   </main>
 
   <script>
-    const events = [
-      { id: 1, title: "Sunday Anniversary Night", date: "2026-09-06", image: "poster1.jpeg" },
-      { id: 2, title: "Anniversary Saturday", date: "2026-09-05", image: "poster3.jpeg" },
-      { id: 3, title: "Anniversary Friday", date: "2026-09-04", image: "poster4.jpeg" },
-      { id: 4, title: "Anniversary Sunday Experience", date: "2026-09-06", image: "poster5.jpeg" },
-      { id: 5, title: "Kalenjin Festival", date: "2026-09-03", image: "poster6.jpeg" },
-      { id: 6, title: "Baniyas Square 3rd Anniversary", date: "2026-09-03", image: "poter2.jpeg" }
+    // 1. Daily Video Schedule
+    const videoSchedule = [
+      { date: "2026-09-01", video: "web_video1.mp4", label: "Countdown Kickoff" },
+      { date: "2026-09-02", video: "web_video1.mp4", label: "Build Up Teaser" },
+      { date: "2026-09-03", video: "web_video1.mp4", label: "Opening Night Teaser" },
+      { date: "2026-09-04", video: "web_video1.mp4", label: "Friday Night Vibe" },
+      { date: "2026-09-05", video: "web_video2.mp4", label: "Saturday Night Teaser" },
+      { date: "2026-09-06", video: "web_video3.mp4", label: "Grand Finale Teaser" }
     ];
+
+    const defaultVideo = { video: "web_video1.mp4", label: "Anniversary Preview" };
+
+    // 2. Poster Events Schedule
+    const events = [
+      { id: 1, title: "Sunday Anniversary Night", startDate: "2026-09-06", endDate: "2026-09-06", image: "poster1.jpeg" },
+      { id: 2, title: "Anniversary Saturday", startDate: "2026-09-05", endDate: "2026-09-05", image: "poster3.jpeg" },
+      { id: 3, title: "Anniversary Friday", startDate: "2026-09-04", endDate: "2026-09-04", image: "poster4.jpeg" },
+      { id: 4, title: "Anniversary Sunday Experience", startDate: "2026-09-06", endDate: "2026-09-06", image: "poster5.jpeg" },
+      { id: 5, title: "Kalenjin Festival", startDate: "2026-09-03", endDate: "2026-09-03", image: "poster6.jpeg" },
+      { id: 6, title: "Baniyas Square 3rd Anniversary", startDate: "2026-09-03", endDate: "2026-09-06", image: "poter2.jpeg" }
+    ];
+
+    function getFormattedTodayStr() {
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
 
     function getNormalizedToday() {
       const now = new Date();
@@ -139,11 +236,52 @@
       return new Date(year, month - 1, day);
     }
 
+    function updateDailyVideo() {
+      const todayStr = getFormattedTodayStr();
+      const scheduledItem = videoSchedule.find(item => item.date === todayStr) || defaultVideo;
+      
+      const videoPlayer = document.getElementById('daily-video');
+      const videoSource = document.getElementById('video-source');
+      const videoTag = document.getElementById('video-tag');
+
+      const targetSrc = `videos/${scheduledItem.video}`;
+
+      if (!videoSource.src.includes(targetSrc)) {
+        videoSource.src = targetSrc;
+        videoTag.textContent = `🔥 ${scheduledItem.label}`;
+        videoPlayer.load();
+        
+        // Try unmuted play first; if rejected by browser policy, fall back to muted play
+        videoPlayer.muted = false;
+        const playPromise = videoPlayer.play();
+        
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            videoPlayer.muted = true;
+            videoPlayer.play().catch(() => {});
+          });
+        }
+      }
+    }
+
+    function toggleSound() {
+      const videoPlayer = document.getElementById('daily-video');
+      const soundBtn = document.getElementById('sound-btn');
+      
+      if (videoPlayer.muted) {
+        videoPlayer.muted = false;
+        soundBtn.textContent = "🔊 Mute Sound";
+      } else {
+        videoPlayer.muted = true;
+        soundBtn.textContent = "🔇 Tap for Sound";
+      }
+    }
+
     function renderGallery() {
       const container = document.getElementById('gallery');
       const today = getNormalizedToday();
 
-      const activeEvents = events.filter(evt => parseEventDate(evt.date) >= today);
+      const activeEvents = events.filter(evt => parseEventDate(evt.endDate) >= today);
 
       if (activeEvents.length === 0) {
         container.innerHTML = `<div class="empty-state">No upcoming events</div>`;
@@ -154,10 +292,12 @@
       let minDiff = Infinity;
 
       activeEvents.forEach(evt => {
-        const evtDate = parseEventDate(evt.date);
-        const diffDays = Math.round((evtDate - today) / (1000 * 60 * 60 * 24));
-        if (diffDays >= 0 && diffDays < minDiff) {
-          minDiff = diffDays;
+        const startDate = parseEventDate(evt.startDate);
+        const diffDays = Math.round((startDate - today) / (1000 * 60 * 60 * 24));
+        const effectiveDiff = diffDays < 0 ? 0 : diffDays;
+
+        if (effectiveDiff < minDiff) {
+          minDiff = effectiveDiff;
           closestId = evt.id;
         }
       });
@@ -165,7 +305,7 @@
       activeEvents.sort((a, b) => {
         if (a.id === closestId) return -1;
         if (b.id === closestId) return 1;
-        return parseEventDate(a.date) - parseEventDate(b.date);
+        return parseEventDate(a.startDate) - parseEventDate(b.startDate);
       });
 
       container.innerHTML = activeEvents.map(evt => {
@@ -184,11 +324,58 @@
       }).join('');
     }
 
-    renderGallery();
-    setInterval(renderGallery, 30000);
+    // Auto Pause/Play video on scroll
+    function setupScrollVideoControl() {
+      const videoElement = document.getElementById('daily-video');
+      const heroSection = document.getElementById('video-hero');
+
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            videoElement.play().catch(() => {});
+          } else {
+            videoElement.pause();
+          }
+        });
+      }, { threshold: 0.25 });
+
+      observer.observe(heroSection);
+    }
+
+    // Unmute audio automatically on first touch, scroll, or click anywhere on screen
+    function enableAudioOnUserGesture() {
+      const videoPlayer = document.getElementById('daily-video');
+      const soundBtn = document.getElementById('sound-btn');
+
+      const unlockAudio = () => {
+        if (videoPlayer.muted) {
+          videoPlayer.muted = false;
+          soundBtn.textContent = "🔊 Mute Sound";
+        }
+        // Remove listeners after first interaction
+        window.removeEventListener('touchstart', unlockAudio);
+        window.removeEventListener('scroll', unlockAudio);
+        window.removeEventListener('click', unlockAudio);
+      };
+
+      // Listen for user interactions
+      window.addEventListener('touchstart', unlockAudio, { passive: true });
+      window.addEventListener('scroll', unlockAudio, { passive: true });
+      window.addEventListener('click', unlockAudio, { passive: true });
+    }
+
+    function initPage() {
+      updateDailyVideo();
+      renderGallery();
+      setupScrollVideoControl();
+      enableAudioOnUserGesture();
+    }
+
+    initPage();
+    setInterval(updateDailyVideo, 30000);
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') renderGallery();
+      if (document.visibilityState === 'visible') updateDailyVideo();
     });
   </script>
 </body>
-</html>
+</html>1
