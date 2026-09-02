@@ -26,12 +26,12 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
 
-    /* Video Player - Displays before Thursday */
+    /* Video Player Section */
     .hero-video-container {
       position: relative;
       width: 100vw;
       height: 100vh;
-      height: 100dvh; /* Adapts dynamically to mobile browser address bars */
+      height: 100dvh;
       background: #000000;
       overflow: hidden;
       display: flex;
@@ -65,7 +65,7 @@
 
     .unmute-btn {
       position: absolute;
-      bottom: 2.5rem; /* Raised slightly higher off the screen bottom for mobile swipe bars */
+      bottom: 2.5rem;
       right: 1.25rem;
       background: rgba(0, 0, 0, 0.85);
       color: #fff;
@@ -75,7 +75,7 @@
       font-size: 0.85rem;
       font-weight: 600;
       cursor: pointer;
-      z-index: 30; /* High z-index to stay above video overlays on touch devices */
+      z-index: 30;
       transition: all 0.3s ease;
       -webkit-tap-highlight-color: transparent;
     }
@@ -85,7 +85,7 @@
       background: rgba(37, 99, 235, 0.9);
     }
 
-    /* Poster Gallery Section - Displays from Thursday onwards */
+    /* Poster Gallery Section */
     .gallery-grid {
       display: flex;
       flex-direction: column;
@@ -178,32 +178,33 @@
 <body>
 
   <main>
-    <!-- Video Player Section (Visible before Thursday) -->
+    <!-- Video Player Section -->
     <section id="video-hero" class="hero-video-container" style="display: none;">
       
       <video id="daily-video" autoplay loop muted playsinline webkit-playsinline preload="auto">
-        <source id="video-source" src="videos/web_video1.mp4" type="video/mp4; codecs=avc1.42E01E, mp4a.40.2">
+        <source id="video-source" src="videos/web_video2.mp4" type="video/mp4; codecs=avc1.42E01E, mp4a.40.2">
         Your browser does not support video playback.
       </video>
 
       <button id="sound-btn" class="unmute-btn" onclick="toggleSound(event)">🔇 Tap for Sound</button>
     </section>
 
-    <!-- Poster Gallery Section (Visible from Thursday onward) -->
+    <!-- Poster Gallery Section -->
     <div id="gallery" class="gallery-grid" style="display: none;"></div>
   </main>
 
   <script>
-    // Release Date Threshold: Thursday, September 3, 2026
-    const THURSDAY_DATE_STR = "2026-09-03";
+    // Switches to gallery mode on Friday, Sept 4
+    const GALLERY_START_DATE_STR = "2026-09-04";
 
-    // Pre-Thursday Video Schedule
+    // Daily Video Schedule
     const videoSchedule = [
       { date: "2026-09-01", video: "web_video1.mp4", label: "Countdown Kickoff" },
-      { date: "2026-09-02", video: "web_video1.mp4", label: "Build Up Teaser" }
+      { date: "2026-09-02", video: "web_video2.mp4", label: "Build Up Teaser" },
+      { date: "2026-09-03", video: "web_video3.mp4", label: "Final Teaser" }
     ];
 
-    const defaultVideo = { video: "web_video1.mp4", label: "Anniversary Teaser" };
+    const defaultVideo = { video: "web_video2.mp4", label: "Anniversary Teaser" };
 
     // Thursday Onward Posters Schedule
     const events = [
@@ -328,7 +329,7 @@
       const heroContainer = document.getElementById('video-hero');
       const galleryContainer = document.getElementById('gallery');
 
-      if (todayStr < THURSDAY_DATE_STR) {
+      if (todayStr < GALLERY_START_DATE_STR) {
         heroContainer.style.display = 'flex';
         galleryContainer.style.display = 'none';
         document.body.style.overflow = 'hidden';
