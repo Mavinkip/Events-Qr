@@ -46,23 +46,6 @@
       display: block;
     }
 
-    .video-overlay-badge {
-      position: absolute;
-      top: 1.25rem;
-      left: 1.25rem;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(8px);
-      color: #fff;
-      font-size: 0.8rem;
-      font-weight: 700;
-      padding: 0.4rem 0.85rem;
-      border-radius: 9999px;
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      z-index: 20;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-    }
-
     .unmute-btn {
       position: absolute;
       bottom: 2.5rem;
@@ -111,25 +94,6 @@
       display: block;
     }
 
-    .card.is-closest {
-      box-shadow: inset 0 0 0 4px var(--primary);
-    }
-
-    .badge-closest {
-      position: absolute;
-      top: 1.25rem;
-      right: 1.25rem;
-      background-color: var(--primary);
-      color: #ffffff;
-      font-size: 0.85rem;
-      font-weight: 800;
-      padding: 0.4rem 0.85rem;
-      border-radius: 9999px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-      z-index: 10;
-      letter-spacing: 0.05em;
-    }
-
     @media (min-width: 640px) {
       body {
         padding: 1.5rem;
@@ -152,11 +116,6 @@
       .card img {
         object-fit: cover;
       }
-
-      .card.is-closest {
-        box-shadow: none;
-        border: 4px solid var(--primary);
-      }
     }
 
     @media (min-width: 1024px) {
@@ -178,42 +137,37 @@
 <body>
 
   <main>
-    <!-- Video Player Section -->
     <section id="video-hero" class="hero-video-container" style="display: none;">
-      
-      <video id="daily-video" autoplay loop muted playsinline webkit-playsinline preload="auto">
-        <source id="video-source" src="videos/web_video2.mp4" type="video/mp4; codecs=avc1.42E01E, mp4a.40.2">
+      <video id="daily-video" autoplay muted playsinline webkit-playsinline preload="auto">
+        <source id="video-source" src="videos/web_video3.mp4" type="video/mp4; codecs=avc1.42E01E, mp4a.40.2">
         Your browser does not support video playback.
       </video>
 
       <button id="sound-btn" class="unmute-btn" onclick="toggleSound(event)">🔇 Tap for Sound</button>
     </section>
 
-    <!-- Poster Gallery Section -->
     <div id="gallery" class="gallery-grid" style="display: none;"></div>
   </main>
 
   <script>
-    // Switches to gallery mode on Friday, Sept 4
     const GALLERY_START_DATE_STR = "2026-09-04";
 
-    // Daily Video Schedule
     const videoSchedule = [
-      { date: "2026-09-01", video: "web_video1.mp4", label: "Countdown Kickoff" },
-      { date: "2026-09-02", video: "web_video2.mp4", label: "Build Up Teaser" },
-      { date: "2026-09-03", video: "web_video3.mp4", label: "Final Teaser" }
+      { date: "2026-09-01", video: "web_video1.mp4" },
+      { date: "2026-09-02", video: "web_video2.mp4" },
+      { date: "2026-09-03", video: "web_video3.mp4" }
     ];
 
-    const defaultVideo = { video: "web_video2.mp4", label: "Anniversary Teaser" };
+    const defaultVideo = { video: "web_video3.mp4" };
 
-    // Thursday Onward Posters Schedule
+    // Poster 2 (`poter2.jpeg`, id: 6) fixed at position 1
     const events = [
-      { id: 1, title: "Sunday Anniversary Night", startDate: "2026-09-06", endDate: "2026-09-06", image: "poster1.jpeg" },
-      { id: 2, title: "Anniversary Saturday", startDate: "2026-09-05", endDate: "2026-09-05", image: "poster3.jpeg" },
-      { id: 3, title: "Anniversary Friday", startDate: "2026-09-04", endDate: "2026-09-04", image: "poster4.jpeg" },
-      { id: 4, title: "Anniversary Sunday Experience", startDate: "2026-09-06", endDate: "2026-09-06", image: "poster5.jpeg" },
+      { id: 6, title: "Baniyas Square 3rd Anniversary", startDate: "2026-09-03", endDate: "2026-09-06", image: "poter2.jpeg" },
       { id: 5, title: "Kalenjin Festival", startDate: "2026-09-03", endDate: "2026-09-03", image: "poster6.jpeg" },
-      { id: 6, title: "Baniyas Square 3rd Anniversary", startDate: "2026-09-03", endDate: "2026-09-06", image: "poter2.jpeg" }
+      { id: 3, title: "Anniversary Friday", startDate: "2026-09-04", endDate: "2026-09-04", image: "poster4.jpeg" },
+      { id: 2, title: "Anniversary Saturday", startDate: "2026-09-05", endDate: "2026-09-05", image: "poster3.jpeg" },
+      { id: 1, title: "Sunday Anniversary Night", startDate: "2026-09-06", endDate: "2026-09-06", image: "poster1.jpeg" },
+      { id: 4, title: "Anniversary Sunday Experience", startDate: "2026-09-06", endDate: "2026-09-06", image: "poster5.jpeg" }
     ];
 
     function getFormattedTodayStr() {
@@ -234,23 +188,33 @@
       return new Date(year, month - 1, day);
     }
 
+    function showPosterGallery() {
+      const heroContainer = document.getElementById('video-hero');
+      const galleryContainer = document.getElementById('gallery');
+      const videoPlayer = document.getElementById('daily-video');
+
+      if (videoPlayer) videoPlayer.pause();
+      
+      heroContainer.style.display = 'none';
+      galleryContainer.style.display = 'flex';
+      document.body.style.overflow = 'auto';
+      
+      renderGallery();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     function updateDailyVideo() {
       const todayStr = getFormattedTodayStr();
       const scheduledItem = videoSchedule.find(item => item.date === todayStr) || defaultVideo;
       
       const videoPlayer = document.getElementById('daily-video');
       const videoSource = document.getElementById('video-source');
-      const videoTag = document.getElementById('video-tag');
 
       const targetSrc = `videos/${scheduledItem.video}`;
 
       if (!videoSource.src.includes(targetSrc)) {
         videoSource.src = targetSrc;
         videoPlayer.load();
-      }
-
-      if (videoTag) {
-        videoTag.textContent = `🔥 ${scheduledItem.label}`;
       }
 
       videoPlayer.muted = true;
@@ -288,40 +252,22 @@
         return;
       }
 
-      let closestId = null;
-      let minDiff = Infinity;
+      const primaryPoster = activeEvents.find(evt => evt.id === 6);
+      const otherPosters = activeEvents.filter(evt => evt.id !== 6);
 
-      activeEvents.forEach(evt => {
-        const startDate = parseEventDate(evt.startDate);
-        const diffDays = Math.round((startDate - today) / (1000 * 60 * 60 * 24));
-        const effectiveDiff = diffDays < 0 ? 0 : diffDays;
+      otherPosters.sort((a, b) => parseEventDate(a.startDate) - parseEventDate(b.startDate));
 
-        if (effectiveDiff < minDiff) {
-          minDiff = effectiveDiff;
-          closestId = evt.id;
-        }
-      });
+      const sortedEvents = primaryPoster ? [primaryPoster, ...otherPosters] : otherPosters;
 
-      activeEvents.sort((a, b) => {
-        if (a.id === closestId) return -1;
-        if (b.id === closestId) return 1;
-        return parseEventDate(a.startDate) - parseEventDate(b.startDate);
-      });
-
-      container.innerHTML = activeEvents.map(evt => {
-        const isClosest = evt.id === closestId;
-
-        return `
-          <div class="card ${isClosest ? 'is-closest' : ''}">
-            ${isClosest ? `<span class="badge-closest">⭐ CLOSEST</span>` : ''}
-            <img 
-              src="images/${evt.image}" 
-              alt="Poster" 
-              loading="lazy"
-            >
-          </div>
-        `;
-      }).join('');
+      container.innerHTML = sortedEvents.map(evt => `
+        <div class="card">
+          <img 
+            src="images/${evt.image}" 
+            alt="${evt.title}" 
+            loading="lazy"
+          >
+        </div>
+      `).join('');
     }
 
     function handleDisplayMode() {
@@ -335,19 +281,17 @@
         document.body.style.overflow = 'hidden';
         updateDailyVideo();
       } else {
-        heroContainer.style.display = 'none';
-        galleryContainer.style.display = 'flex';
-        document.body.style.overflow = 'auto';
-        
-        const videoPlayer = document.getElementById('daily-video');
-        if (videoPlayer) videoPlayer.pause();
-        
-        renderGallery();
+        showPosterGallery();
       }
     }
 
     function initPage() {
       handleDisplayMode();
+
+      const videoPlayer = document.getElementById('daily-video');
+      if (videoPlayer) {
+        videoPlayer.addEventListener('ended', showPosterGallery);
+      }
     }
 
     initPage();
