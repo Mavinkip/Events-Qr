@@ -18,12 +18,17 @@
       padding: 0;
     }
 
+    html {
+      scroll-behavior: smooth;
+    }
+
     body {
       background-color: var(--bg);
       color: #ffffff;
       min-height: 100vh;
       min-height: 100dvh;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      overflow-y: auto; /* Always allow scrolling */
     }
 
     /* Video Player Section */
@@ -137,7 +142,7 @@
 <body>
 
   <main>
-    <section id="video-hero" class="hero-video-container" style="display: none;">
+    <section id="video-hero" class="hero-video-container">
       <video id="daily-video" autoplay muted playsinline webkit-playsinline preload="auto">
         <source id="video-source" src="videos/web_video3.mp4" type="video/mp4; codecs=avc1.42E01E, mp4a.40.2">
         Your browser does not support video playback.
@@ -146,7 +151,7 @@
       <button id="sound-btn" class="unmute-btn" onclick="toggleSound(event)">🔇 Tap for Sound</button>
     </section>
 
-    <div id="gallery" class="gallery-grid" style="display: none;"></div>
+    <div id="gallery" class="gallery-grid"></div>
   </main>
 
   <script>
@@ -170,6 +175,8 @@
       { id: 4, title: "Anniversary Sunday Experience", startDate: "2026-09-06", endDate: "2026-09-06", image: "poster5.jpeg" }
     ];
 
+    let hasVideoPlayedOnce = false;
+
     function getFormattedTodayStr() {
       const now = new Date();
       const year = now.getFullYear();
@@ -188,19 +195,12 @@
       return new Date(year, month - 1, day);
     }
 
-    function showPosterGallery() {
-      const heroContainer = document.getElementById('video-hero');
-      const galleryContainer = document.getElementById('gallery');
-      const videoPlayer = document.getElementById('daily-video');
-
-      if (videoPlayer) videoPlayer.pause();
-      
-      heroContainer.style.display = 'none';
-      galleryContainer.style.display = 'flex';
-      document.body.style.overflow = 'auto';
-      
-      renderGallery();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    function scrollToGallery() {
+      hasVideoPlayedOnce = true;
+      const gallery = document.getElementById('gallery');
+      if (gallery) {
+        gallery.scrollIntoView({ behavior: 'smooth' });
+      }
     }
 
     function updateDailyVideo() {
@@ -217,8 +217,10 @@
         videoPlayer.load();
       }
 
-      videoPlayer.muted = true;
-      videoPlayer.play().catch(() => {});
+      if (!hasVideoPlayedOnce) {
+        videoPlayer.muted = true;
+        videoPlayer.play().catch(() => {});
+      }
     }
 
     function toggleSound(e) {
@@ -273,15 +275,14 @@
     function handleDisplayMode() {
       const todayStr = getFormattedTodayStr();
       const heroContainer = document.getElementById('video-hero');
-      const galleryContainer = document.getElementById('gallery');
+      
+      renderGallery();
 
       if (todayStr < GALLERY_START_DATE_STR) {
         heroContainer.style.display = 'flex';
-        galleryContainer.style.display = 'none';
-        document.body.style.overflow = 'hidden';
         updateDailyVideo();
       } else {
-        showPosterGallery();
+        heroContainer.style.display = 'none';
       }
     }
 
@@ -290,8 +291,18 @@
 
       const videoPlayer = document.getElementById('daily-video');
       if (videoPlayer) {
-        videoPlayer.addEventListener('ended', showPosterGallery);
+        // Smooth scroll to Poster 2 when video ends
+        videoPlayer.addEventListener('ended', scrollToGallery);
       }
+
+      // Replay video only if user manually scrolls back to the top section
+      window.addEventListener('scroll', () => {
+        if (window.scrollY === 0 && hasVideoPlayedOnce && videoPlayer) {
+          hasVideoPlayedOnce = false;
+          videoPlayer.currentTime = 0;
+          videoPlayer.play().catch(() => {});
+        }
+      });
     }
 
     initPage();
